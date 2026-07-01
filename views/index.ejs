@@ -2,102 +2,181 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Expense Tracker</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 </head>
-<body>
-  <div class="container">
-    <h1>Pencatatan Pengeluaran Harian</h1>
+<body class="d-flex flex-column">
+  <div class="page">
+    <header class="navbar navbar-expand-md navbar-light d-print-none">
+      <div class="container-xl">
+        <a href="/" class="navbar-brand navbar-brand-autodark">
+          <i class="ti ti-wallet me-2"></i>Expense Tracker
+        </a>
+      </div>
+    </header>
 
-    <% if (error) { %>
-      <div class="alert" data-testid="error-message"><%= error %></div>
-    <% } %>
+    <div class="page-wrapper">
+      <div class="page-header d-print-none">
+        <div class="container-xl">
+          <h2 class="page-title">Pencatatan Pengeluaran Harian</h2>
+          <div class="text-secondary mt-1">Catat, filter, dan pantau pengeluaran harianmu</div>
+        </div>
+      </div>
 
-    <section class="card">
-      <h2>Tambah Pengeluaran</h2>
-      <form method="POST" action="/expenses">
-        <div class="form-row">
-          <label for="amount">Nominal (Rp)</label>
-          <input type="number" id="amount" name="amount">
-        </div>
-        <div class="form-row">
-          <label for="category">Kategori</label>
-          <select id="category" name="category">
-            <option value="">-- Pilih Kategori --</option>
-            <% categories.forEach(function(cat) { %>
-              <option value="<%= cat %>"><%= cat %></option>
-            <% }) %>
-          </select>
-        </div>
-        <div class="form-row">
-          <label for="date">Tanggal</label>
-          <input type="date" id="date" name="date">
-        </div>
-        <div class="form-row">
-          <label for="note">Catatan</label>
-          <input type="text" id="note" name="note" placeholder="Opsional">
-        </div>
-        <button type="submit" data-testid="submit-add">Tambah</button>
-      </form>
-    </section>
+      <div class="page-body">
+        <div class="container-xl">
 
-    <section class="card">
-      <h2>Filter</h2>
-      <form method="GET" action="/">
-        <div class="form-row">
-          <label for="filter-category">Kategori</label>
-          <select id="filter-category" name="category">
-            <option value="">Semua Kategori</option>
-            <% categories.forEach(function(cat) { %>
-              <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
-            <% }) %>
-          </select>
-        </div>
-        <div class="form-row">
-          <label for="dateFrom">Dari Tanggal</label>
-          <input type="date" id="dateFrom" name="dateFrom" value="<%= filters.dateFrom %>">
-        </div>
-        <div class="form-row">
-          <label for="dateTo">Sampai Tanggal</label>
-          <input type="date" id="dateTo" name="dateTo" value="<%= filters.dateTo %>">
-        </div>
-        <button type="submit" data-testid="submit-filter">Terapkan Filter</button>
-      </form>
-    </section>
-
-    <section class="card">
-      <h2>Daftar Pengeluaran</h2>
-      <p class="total" data-testid="total-amount">Total: Rp <%= total.toLocaleString('id-ID') %></p>
-      <table data-testid="expense-table">
-        <thead>
-          <tr>
-            <th>Tanggal</th>
-            <th>Kategori</th>
-            <th>Nominal</th>
-            <th>Catatan</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% if (expenses.length === 0) { %>
-            <tr><td colspan="5" class="empty" data-testid="empty-row">Belum ada data pengeluaran</td></tr>
+          <% if (error) { %>
+            <div class="alert alert-danger" data-testid="error-message"><%= error %></div>
           <% } %>
-          <% expenses.forEach(function(exp) { %>
-            <tr class="expense-row" data-testid="expense-row" data-id="<%= exp.id %>">
-              <td><%= exp.date %></td>
-              <td><%= exp.category %></td>
-              <td>Rp <%= exp.amount.toLocaleString('id-ID') %></td>
-              <td><%= exp.note %></td>
-              <td>
-                <form method="POST" action="/expenses/<%= exp.id %>/delete">
-                  <button type="submit" data-testid="delete-btn">Hapus</button>
-                </form>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </section>
+
+          <div class="row row-cards mb-3">
+            <div class="col-sm-6 col-lg-4">
+              <div class="card card-sm">
+                <div class="card-body">
+                  <div class="row align-items-center">
+                    <div class="col-auto">
+                      <span class="bg-primary text-white avatar"><i class="ti ti-cash"></i></span>
+                    </div>
+                    <div class="col">
+                      <div class="font-weight-medium">Total Pengeluaran</div>
+                      <div class="text-secondary" data-testid="total-amount">Rp <%= total.toLocaleString('id-ID') %></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row row-cards">
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Tambah Pengeluaran</h3>
+                </div>
+                <div class="card-body">
+                  <form method="POST" action="/expenses">
+                    <div class="mb-3">
+                      <label class="form-label" for="amount">Nominal (Rp)</label>
+                      <input type="number" id="amount" name="amount" class="form-control" placeholder="cth. 50000">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" for="category">Kategori</label>
+                      <select id="category" name="category" class="form-select">
+                        <option value="">-- Pilih Kategori --</option>
+                        <% categories.forEach(function(cat) { %>
+                          <option value="<%= cat %>"><%= cat %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" for="date">Tanggal</label>
+                      <input type="date" id="date" name="date" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label" for="note">Catatan</label>
+                      <input type="text" id="note" name="note" class="form-control" placeholder="Opsional">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" data-testid="submit-add">
+                      <i class="ti ti-plus me-1"></i>Tambah
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Filter</h3>
+                </div>
+                <div class="card-body">
+                  <form method="GET" action="/">
+                    <div class="mb-3">
+                      <label class="form-label" for="filter-category">Kategori</label>
+                      <select id="filter-category" name="category" class="form-select">
+                        <option value="">Semua Kategori</option>
+                        <% categories.forEach(function(cat) { %>
+                          <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+                    <div class="row">
+                      <div class="col mb-3">
+                        <label class="form-label" for="dateFrom">Dari Tanggal</label>
+                        <input type="date" id="dateFrom" name="dateFrom" class="form-control" value="<%= filters.dateFrom %>">
+                      </div>
+                      <div class="col mb-3">
+                        <label class="form-label" for="dateTo">Sampai Tanggal</label>
+                        <input type="date" id="dateTo" name="dateTo" class="form-control" value="<%= filters.dateTo %>">
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary w-100" data-testid="submit-filter">
+                      <i class="ti ti-filter me-1"></i>Terapkan Filter
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Daftar Pengeluaran</h3>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-vcenter card-table" data-testid="expense-table">
+                    <thead>
+                      <tr>
+                        <th>Tanggal</th>
+                        <th>Kategori</th>
+                        <th>Nominal</th>
+                        <th>Catatan</th>
+                        <th class="w-1"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% if (expenses.length === 0) { %>
+                        <tr>
+                          <td colspan="5" class="text-center text-secondary py-4" data-testid="empty-row">
+                            Belum ada data pengeluaran
+                          </td>
+                        </tr>
+                      <% } %>
+                      <% var badgeColor = { Makanan: 'orange', Transportasi: 'blue', Belanja: 'purple', Tagihan: 'red', Hiburan: 'green', Lainnya: 'secondary' }; %>
+                      <% expenses.forEach(function(exp) { %>
+                        <tr class="expense-row" data-testid="expense-row" data-id="<%= exp.id %>">
+                          <td><%= exp.date %></td>
+                          <td><span class="badge bg-<%= badgeColor[exp.category] || 'secondary' %>-lt"><%= exp.category %></span></td>
+                          <td>Rp <%= exp.amount.toLocaleString('id-ID') %></td>
+                          <td><%= exp.note %></td>
+                          <td>
+                            <form method="POST" action="/expenses/<%= exp.id %>/delete" class="mb-0">
+                              <button type="submit" class="btn btn-sm btn-outline-danger" data-testid="delete-btn">
+                                <i class="ti ti-trash"></i>
+                              </button>
+                            </form>
+                          </td>
+                        </tr>
+                      <% }) %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <footer class="footer footer-transparent d-print-none">
+        <div class="container-xl">
+          <div class="text-center text-secondary">Expense Tracker &copy; 2026</div>
+        </div>
+      </footer>
+    </div>
   </div>
 </body>
 </html>
