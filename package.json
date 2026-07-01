@@ -1,0 +1,19 @@
+{
+  "name": "expense-tracker",
+  "version": "1.0.0",
+  "description": "Simple daily expense tracker web app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test:unit": "jest",
+    "test:system": "playwright test"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.50.1",
+    "jest": "^29.7.0"
+  }
+}
