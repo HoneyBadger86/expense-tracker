@@ -10,7 +10,7 @@ test.beforeEach(async () => {
 
 test('menampilkan pesan kosong saat belum ada data', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByTestId('empty-row')).toContainText('Belum ada data pengeluaran');
+  await expect(page.getByTestId('empty-row')).toContainText('Belum ada cerita pengeluaran', { ignoreCase: true });
   await expect(page.getByTestId('total-amount')).toContainText('Rp 0');
 });
 
