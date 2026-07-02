@@ -8,6 +8,7 @@ const {
   loadSettings,
   saveSettings
 } = require('./src/store');
+const { buildWorkbook } = require('./src/excelExport');
 const {
   CATEGORIES,
   createExpense,
@@ -141,6 +142,27 @@ app.get('/export/csv', (req, res) => {
   // String literal berisi karakter BOM (U+FEFF) agar Excel membaca UTF-8 dengan benar
   const excelBom = '﻿';
   res.send(excelBom + toCsv(sorted));
+});
+
+app.get('/export/xlsx', async (req, res) => {
+  const expenses = loadExpenses();
+  const filtered = filterExpenses(expenses, parseFilters(req.query));
+  const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
+  const incomes = [...loadIncomes()].sort((a, b) => b.date.localeCompare(a.date));
+
+  const workbook = await buildWorkbook({
+    expenses: sorted,
+    incomes,
+    categorySummary: summarizeByCategory(sorted)
+  });
+
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  );
+  res.setHeader('Content-Disposition', 'attachment; filename="expense-tracker.xlsx"');
+  await workbook.xlsx.write(res);
+  res.end();
 });
 
 app.post('/budget', (req, res) => {

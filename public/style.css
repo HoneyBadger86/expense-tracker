@@ -328,6 +328,16 @@ a.btn-funky {
   font-size: 14px;
 }
 
+.export-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.export-actions .btn-funky i {
+  margin-right: 4px;
+}
+
 .btn-link {
   display: block;
   text-align: center;

@@ -239,6 +239,29 @@ test('export CSV mengembalikan data pengeluaran', async ({ page }) => {
   expect(body).toContain('2026-07-03,Transportasi,15000,Ojek pagi');
 });
 
+test('export Excel mengembalikan workbook berisi data', async ({ page }) => {
+  const ExcelJS = require('exceljs');
+
+  await page.goto('/');
+  await page.fill('#amount', '15000');
+  await page.selectOption('#category', 'Transportasi');
+  await page.fill('#date', '2026-07-03');
+  await page.fill('#note', 'Ojek pagi');
+  await page.getByTestId('submit-add').click();
+
+  const response = await page.request.get('/export/xlsx');
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('spreadsheetml');
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(await response.body());
+  expect(workbook.worksheets.map((s) => s.name)).toEqual(['Pengeluaran', 'Pemasukan', 'Ringkasan']);
+
+  const sheet = workbook.getWorksheet('Pengeluaran');
+  expect(sheet.getCell('A2').value).toBe('2026-07-03');
+  expect(sheet.getCell('C2').value).toBe(15000);
+});
+
 test('chart tren bulanan tampil', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('trend-chart')).toBeVisible();

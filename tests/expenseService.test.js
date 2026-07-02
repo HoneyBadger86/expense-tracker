@@ -263,3 +263,46 @@ describe('toCsv', () => {
     expect(csv.split('\r\n')[1]).toBe('2026-07-01,Lainnya,100,"a,b ""c"""');
   });
 });
+
+describe('buildWorkbook', () => {
+  const { buildWorkbook } = require('../src/excelExport');
+
+  const data = {
+    expenses: [
+      { date: '2026-07-02', category: 'Tagihan', amount: 9000000, note: 'bayar kuliah' },
+      { date: '2026-07-01', category: 'Makanan', amount: 20000, note: 'makan nasi' }
+    ],
+    incomes: [{ date: '2026-07-01', amount: 10000000, note: 'Gaji' }],
+    categorySummary: { Tagihan: 9000000, Makanan: 20000 }
+  };
+
+  test('creates the three sheets', async () => {
+    const workbook = await buildWorkbook(data);
+    expect(workbook.worksheets.map((s) => s.name)).toEqual([
+      'Pengeluaran',
+      'Pemasukan',
+      'Ringkasan'
+    ]);
+  });
+
+  test('expense sheet has header, rows, and total', async () => {
+    const workbook = await buildWorkbook(data);
+    const sheet = workbook.getWorksheet('Pengeluaran');
+    expect(sheet.getCell('A1').value).toBe('Tanggal');
+    expect(sheet.getCell('C2').value).toBe(9000000);
+    expect(sheet.getCell('B4').value).toBe('TOTAL');
+    expect(sheet.getCell('C4').value).toBe(9020000);
+  });
+
+  test('summary sheet contains balance row', async () => {
+    const workbook = await buildWorkbook(data);
+    const sheet = workbook.getWorksheet('Ringkasan');
+    let saldoValue = null;
+    sheet.eachRow((row) => {
+      if (row.getCell(1).value === 'Saldo') {
+        saldoValue = row.getCell(2).value;
+      }
+    });
+    expect(saldoValue).toBe(10000000 - 9020000);
+  });
+});

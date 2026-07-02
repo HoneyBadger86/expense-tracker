@@ -168,8 +168,12 @@
     <section class="card card-list">
       <div class="list-head">
         <h2><i class="fa-solid fa-list"></i> Daftar Pengeluaran</h2>
-        <a href="/export/csv?category=<%= encodeURIComponent(filters.category) %>&dateFrom=<%= filters.dateFrom %>&dateTo=<%= filters.dateTo %>"
-           class="btn-funky btn-small btn-outline" data-testid="export-csv">Export CSV</a>
+        <div class="export-actions">
+          <a href="/export/xlsx?category=<%= encodeURIComponent(filters.category) %>&dateFrom=<%= filters.dateFrom %>&dateTo=<%= filters.dateTo %>"
+             class="btn-funky btn-small" data-testid="export-xlsx"><i class="fa-solid fa-file-excel"></i> Export Excel</a>
+          <a href="/export/csv?category=<%= encodeURIComponent(filters.category) %>&dateFrom=<%= filters.dateFrom %>&dateTo=<%= filters.dateTo %>"
+             class="btn-funky btn-small btn-outline" data-testid="export-csv">Export CSV</a>
+        </div>
       </div>
       <div class="table-scroll">
         <table data-testid="expense-table">
