@@ -1,6 +1,13 @@
 const express = require('express');
 const path = require('path');
-const { loadExpenses, saveExpenses, loadSettings, saveSettings } = require('./src/store');
+const {
+  loadExpenses,
+  saveExpenses,
+  loadIncomes,
+  saveIncomes,
+  loadSettings,
+  saveSettings
+} = require('./src/store');
 const {
   CATEGORIES,
   createExpense,
@@ -10,7 +17,10 @@ const {
   updateExpense,
   summarizeByCategory,
   monthlyTotal,
-  budgetStatus
+  budgetStatus,
+  createIncome,
+  monthlySeries,
+  toCsv
 } = require('./src/expenseService');
 
 const app = express();
@@ -21,19 +31,26 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+function parseFilters(query) {
+  return {
+    category: query.category || '',
+    dateFrom: query.dateFrom || '',
+    dateTo: query.dateTo || ''
+  };
+}
+
 app.get('/', (req, res) => {
   const expenses = loadExpenses();
+  const incomes = loadIncomes();
   const settings = loadSettings();
-  const filters = {
-    category: req.query.category || '',
-    dateFrom: req.query.dateFrom || '',
-    dateTo: req.query.dateTo || ''
-  };
+  const filters = parseFilters(req.query);
   const filtered = filterExpenses(expenses, filters);
   const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
+  const sortedIncomes = [...incomes].sort((a, b) => b.date.localeCompare(a.date));
 
   const currentMonth = new Date().toISOString().slice(0, 7);
   const spentThisMonth = monthlyTotal(expenses, currentMonth);
+  const incomeThisMonth = monthlyTotal(incomes, currentMonth);
   const budget = {
     limit: settings.monthlyBudget || 0,
     spent: spentThisMonth,
@@ -42,8 +59,12 @@ app.get('/', (req, res) => {
 
   res.render('index', {
     expenses: sorted,
+    incomes: sortedIncomes,
     total: calculateTotal(filtered),
+    incomeThisMonth,
+    balance: incomeThisMonth - spentThisMonth,
     categorySummary: summarizeByCategory(filtered),
+    trend: monthlySeries(expenses, 6),
     budget,
     categories: CATEGORIES,
     filters,
@@ -90,6 +111,36 @@ app.post('/expenses/:id/delete', (req, res) => {
   const expenses = loadExpenses();
   saveExpenses(deleteExpense(expenses, req.params.id));
   res.redirect('/');
+});
+
+app.post('/incomes', (req, res) => {
+  try {
+    const incomes = loadIncomes();
+    const income = createIncome(req.body);
+    incomes.push(income);
+    saveIncomes(incomes);
+    res.redirect('/');
+  } catch (err) {
+    res.redirect('/?error=' + encodeURIComponent(err.message));
+  }
+});
+
+app.post('/incomes/:id/delete', (req, res) => {
+  const incomes = loadIncomes();
+  saveIncomes(deleteExpense(incomes, req.params.id));
+  res.redirect('/');
+});
+
+app.get('/export/csv', (req, res) => {
+  const expenses = loadExpenses();
+  const filtered = filterExpenses(expenses, parseFilters(req.query));
+  const sorted = [...filtered].sort((a, b) => b.date.localeCompare(a.date));
+
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="pengeluaran.csv"');
+  // String literal berisi karakter BOM (U+FEFF) agar Excel membaca UTF-8 dengan benar
+  const excelBom = '﻿';
+  res.send(excelBom + toCsv(sorted));
 });
 
 app.post('/budget', (req, res) => {

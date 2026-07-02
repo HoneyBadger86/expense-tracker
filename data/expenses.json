@@ -12,5 +12,12 @@
     "category": "Tagihan",
     "date": "2026-07-02",
     "note": "bayar kuliah"
+  },
+  {
+    "id": 1782955155209,
+    "amount": 400000,
+    "category": "Tagihan",
+    "date": "2026-07-02",
+    "note": "claude ai"
   }
 ]

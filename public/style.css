@@ -236,6 +236,68 @@ body {
   max-width: 560px;
 }
 
+.stat-income {
+  color: #15803d;
+}
+
+.stat-negative {
+  color: #dc2626;
+}
+
+.btn-income {
+  background: linear-gradient(90deg, #16a34a, #4ade80);
+  box-shadow: 0 12px 24px -10px rgba(22, 163, 74, 0.6);
+}
+
+.btn-income:hover {
+  box-shadow: 0 16px 28px -10px rgba(22, 163, 74, 0.7);
+}
+
+.filter-inline {
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 140px;
+}
+
+.filter-field label {
+  margin-top: 0;
+}
+
+.filter-inline .btn-funky.btn-small {
+  margin-bottom: 2px;
+}
+
+.list-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 12px;
+}
+
+.list-head h2 {
+  margin-bottom: 0;
+}
+
+.list-head + .table-scroll {
+  margin-top: 14px;
+}
+
+a.btn-funky {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.amount-in {
+  color: #15803d;
+}
+
 .btn-link {
   display: block;
   text-align: center;

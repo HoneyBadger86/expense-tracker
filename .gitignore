@@ -4,3 +4,4 @@ playwright-report/
 playwright/.cache/
 data/expenses.test.json
 data/settings.test.json
+data/incomes.test.json

@@ -7,7 +7,11 @@ const {
   updateExpense,
   summarizeByCategory,
   monthlyTotal,
-  budgetStatus
+  budgetStatus,
+  validateIncome,
+  createIncome,
+  monthlySeries,
+  toCsv
 } = require('../src/expenseService');
 
 describe('validateExpense', () => {
@@ -200,5 +204,62 @@ describe('budgetStatus', () => {
 
   test('returns over with capped percent when limit exceeded', () => {
     expect(budgetStatus(150000, 100000)).toEqual({ percent: 100, state: 'over' });
+  });
+});
+
+describe('validateIncome', () => {
+  test('returns no errors for valid data', () => {
+    expect(validateIncome({ amount: '1000000', date: '2026-07-01' })).toHaveLength(0);
+  });
+
+  test('rejects zero amount and missing date', () => {
+    const errors = validateIncome({ amount: '0', date: '' });
+    expect(errors).toContain('Nominal harus lebih besar dari 0');
+    expect(errors).toContain('Tanggal harus diisi');
+  });
+});
+
+describe('createIncome', () => {
+  test('creates income with generated id and defaults note', () => {
+    const income = createIncome({ amount: '500000', date: '2026-07-01' }, () => 9);
+    expect(income).toEqual({ id: 9, amount: 500000, date: '2026-07-01', note: '' });
+  });
+
+  test('throws when data is invalid', () => {
+    expect(() => createIncome({ amount: '-5', date: '' })).toThrow();
+  });
+});
+
+describe('monthlySeries', () => {
+  const expenses = [
+    { amount: 10000, date: '2026-07-01' },
+    { amount: 20000, date: '2026-06-15' },
+    { amount: 30000, date: '2026-02-10' }
+  ];
+
+  test('returns totals for the last N months ending now', () => {
+    const series = monthlySeries(expenses, 3, new Date(2026, 6, 15));
+    expect(series).toEqual([
+      { month: '2026-05', total: 0 },
+      { month: '2026-06', total: 20000 },
+      { month: '2026-07', total: 10000 }
+    ]);
+  });
+
+  test('crosses year boundary correctly', () => {
+    const series = monthlySeries([], 2, new Date(2026, 0, 10));
+    expect(series.map((s) => s.month)).toEqual(['2025-12', '2026-01']);
+  });
+});
+
+describe('toCsv', () => {
+  test('produces header and data rows', () => {
+    const csv = toCsv([{ date: '2026-07-01', category: 'Makanan', amount: 50000, note: 'siang' }]);
+    expect(csv).toBe('Tanggal,Kategori,Nominal,Catatan\r\n2026-07-01,Makanan,50000,siang');
+  });
+
+  test('escapes commas and quotes in notes', () => {
+    const csv = toCsv([{ date: '2026-07-01', category: 'Lainnya', amount: 100, note: 'a,b "c"' }]);
+    expect(csv.split('\r\n')[1]).toBe('2026-07-01,Lainnya,100,"a,b ""c"""');
   });
 });

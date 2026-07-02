@@ -3,10 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '..', 'data', 'expenses.test.json');
+const INCOME_FILE = path.join(__dirname, '..', 'data', 'incomes.test.json');
 const SETTINGS_FILE = path.join(__dirname, '..', 'data', 'settings.test.json');
 
 test.beforeEach(async () => {
   fs.writeFileSync(DATA_FILE, '[]');
+  fs.writeFileSync(INCOME_FILE, '[]');
   fs.writeFileSync(SETTINGS_FILE, JSON.stringify({ monthlyBudget: 0 }));
 });
 
@@ -160,8 +162,84 @@ test('menghapus pengeluaran menghilangkan baris dan mengurangi total', async ({ 
 
   await expect(page.getByTestId('expense-row')).toHaveCount(1);
 
+  page.on('dialog', (dialog) => dialog.accept());
   await page.getByTestId('delete-btn').click();
 
   await expect(page.getByTestId('empty-row')).toBeVisible();
   await expect(page.getByTestId('total-amount')).toContainText('Rp 0');
+});
+
+test('membatalkan konfirmasi hapus mempertahankan data', async ({ page }) => {
+  await page.goto('/');
+
+  await page.fill('#amount', '30000');
+  await page.selectOption('#category', 'Belanja');
+  await page.fill('#date', '2026-07-04');
+  await page.getByTestId('submit-add').click();
+
+  page.on('dialog', (dialog) => dialog.dismiss());
+  await page.getByTestId('delete-btn').click();
+
+  await expect(page.getByTestId('expense-row')).toHaveCount(1);
+  await expect(page.getByTestId('total-amount')).toContainText('Rp 30.000');
+});
+
+test('menambah pemasukan memperbarui pemasukan dan saldo bulan ini', async ({ page }) => {
+  const today = new Date().toISOString().slice(0, 10);
+  await page.goto('/');
+
+  await page.fill('#i-amount', '100000');
+  await page.fill('#i-date', today);
+  await page.fill('#i-note', 'Gaji');
+  await page.getByTestId('submit-income').click();
+
+  await expect(page.getByTestId('income-total')).toContainText('Rp 100.000');
+  await expect(page.getByTestId('balance-amount')).toContainText('Rp 100.000');
+  await expect(page.getByTestId('income-row')).toHaveCount(1);
+
+  await page.fill('#amount', '30000');
+  await page.selectOption('#category', 'Makanan');
+  await page.fill('#date', today);
+  await page.getByTestId('submit-add').click();
+
+  await expect(page.getByTestId('balance-amount')).toContainText('Rp 70.000');
+});
+
+test('menghapus pemasukan mengembalikan saldo', async ({ page }) => {
+  const today = new Date().toISOString().slice(0, 10);
+  await page.goto('/');
+
+  await page.fill('#i-amount', '50000');
+  await page.fill('#i-date', today);
+  await page.getByTestId('submit-income').click();
+
+  await expect(page.getByTestId('income-row')).toHaveCount(1);
+
+  page.on('dialog', (dialog) => dialog.accept());
+  await page.getByTestId('income-delete-btn').click();
+
+  await expect(page.getByTestId('income-empty-row')).toBeVisible();
+  await expect(page.getByTestId('income-total')).toContainText('Rp 0');
+});
+
+test('export CSV mengembalikan data pengeluaran', async ({ page }) => {
+  await page.goto('/');
+
+  await page.fill('#amount', '15000');
+  await page.selectOption('#category', 'Transportasi');
+  await page.fill('#date', '2026-07-03');
+  await page.fill('#note', 'Ojek pagi');
+  await page.getByTestId('submit-add').click();
+
+  const response = await page.request.get('/export/csv');
+  expect(response.status()).toBe(200);
+  expect(response.headers()['content-type']).toContain('text/csv');
+  const body = await response.text();
+  expect(body).toContain('Tanggal,Kategori,Nominal,Catatan');
+  expect(body).toContain('2026-07-03,Transportasi,15000,Ojek pagi');
+});
+
+test('chart tren bulanan tampil', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('trend-chart')).toBeVisible();
 });

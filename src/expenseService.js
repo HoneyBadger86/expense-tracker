@@ -89,6 +89,59 @@ function monthlyTotal(expenses, yearMonth) {
   );
 }
 
+function validateIncome(data) {
+  const errors = [];
+  const amount = Number(data.amount);
+
+  if (!data.amount || Number.isNaN(amount) || amount <= 0) {
+    errors.push('Nominal harus lebih besar dari 0');
+  }
+  if (!data.date) {
+    errors.push('Tanggal harus diisi');
+  }
+
+  return errors;
+}
+
+function createIncome(data, idGenerator = () => Date.now()) {
+  const errors = validateIncome(data);
+  if (errors.length > 0) {
+    throw new Error(errors.join(', '));
+  }
+
+  return {
+    id: idGenerator(),
+    amount: Number(data.amount),
+    date: data.date,
+    note: data.note || ''
+  };
+}
+
+function monthlySeries(expenses, months = 6, now = new Date()) {
+  const series = [];
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const yearMonth = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    series.push({ month: yearMonth, total: monthlyTotal(expenses, yearMonth) });
+  }
+  return series;
+}
+
+function csvField(value) {
+  const text = String(value == null ? '' : value);
+  return /[",\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text;
+}
+
+function toCsv(expenses) {
+  const lines = ['Tanggal,Kategori,Nominal,Catatan'];
+  for (const expense of expenses) {
+    lines.push(
+      [expense.date, expense.category, expense.amount, expense.note].map(csvField).join(',')
+    );
+  }
+  return lines.join('\r\n');
+}
+
 function budgetStatus(spent, limit) {
   if (!limit || limit <= 0) {
     return { percent: 0, state: 'none' };
@@ -113,5 +166,9 @@ module.exports = {
   updateExpense,
   summarizeByCategory,
   monthlyTotal,
-  budgetStatus
+  budgetStatus,
+  validateIncome,
+  createIncome,
+  monthlySeries,
+  toCsv
 };

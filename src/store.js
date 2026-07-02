@@ -2,31 +2,53 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = process.env.DATA_FILE || path.join(__dirname, '..', 'data', 'expenses.json');
+const INCOME_FILE = process.env.INCOME_FILE || path.join(__dirname, '..', 'data', 'incomes.json');
+const SETTINGS_FILE = process.env.SETTINGS_FILE || path.join(__dirname, '..', 'data', 'settings.json');
+
+function readJson(file, fallback) {
+  if (!fs.existsSync(file)) {
+    return fallback;
+  }
+  const raw = fs.readFileSync(file, 'utf-8').trim();
+  return raw ? JSON.parse(raw) : fallback;
+}
+
+function writeJson(file, value) {
+  fs.writeFileSync(file, JSON.stringify(value, null, 2));
+}
 
 function loadExpenses() {
-  if (!fs.existsSync(DATA_FILE)) {
-    return [];
-  }
-  const raw = fs.readFileSync(DATA_FILE, 'utf-8').trim();
-  return raw ? JSON.parse(raw) : [];
+  return readJson(DATA_FILE, []);
 }
 
 function saveExpenses(expenses) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(expenses, null, 2));
+  writeJson(DATA_FILE, expenses);
 }
 
-const SETTINGS_FILE = process.env.SETTINGS_FILE || path.join(__dirname, '..', 'data', 'settings.json');
+function loadIncomes() {
+  return readJson(INCOME_FILE, []);
+}
+
+function saveIncomes(incomes) {
+  writeJson(INCOME_FILE, incomes);
+}
 
 function loadSettings() {
-  if (!fs.existsSync(SETTINGS_FILE)) {
-    return { monthlyBudget: 0 };
-  }
-  const raw = fs.readFileSync(SETTINGS_FILE, 'utf-8').trim();
-  return raw ? JSON.parse(raw) : { monthlyBudget: 0 };
+  return readJson(SETTINGS_FILE, { monthlyBudget: 0 });
 }
 
 function saveSettings(settings) {
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+  writeJson(SETTINGS_FILE, settings);
 }
 
-module.exports = { loadExpenses, saveExpenses, loadSettings, saveSettings, DATA_FILE, SETTINGS_FILE };
+module.exports = {
+  loadExpenses,
+  saveExpenses,
+  loadIncomes,
+  saveIncomes,
+  loadSettings,
+  saveSettings,
+  DATA_FILE,
+  INCOME_FILE,
+  SETTINGS_FILE
+};

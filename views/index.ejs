@@ -20,12 +20,34 @@
   </header>
 
   <main class="wrap">
+    <% if (error) { %>
+      <div class="alert-funky" data-testid="error-message">🚨 <%= error %></div>
+    <% } %>
+
     <div class="grid-2 stat-grid">
       <div class="stat-card">
         <span class="stat-emoji">🪙</span>
         <div>
           <p class="stat-label">Total Pengeluaran</p>
           <p class="stat-value" data-testid="total-amount">Rp <%= total.toLocaleString('id-ID') %></p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-emoji">💰</span>
+        <div>
+          <p class="stat-label">Pemasukan Bulan Ini</p>
+          <p class="stat-value stat-income" data-testid="income-total">Rp <%= incomeThisMonth.toLocaleString('id-ID') %></p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-emoji">⚖️</span>
+        <div>
+          <p class="stat-label">Saldo Bulan Ini</p>
+          <p class="stat-value <%= balance < 0 ? 'stat-negative' : 'stat-income' %>" data-testid="balance-amount">
+            Rp <%= balance.toLocaleString('id-ID') %>
+          </p>
         </div>
       </div>
 
@@ -56,13 +78,9 @@
       </div>
     </div>
 
-    <% if (error) { %>
-      <div class="alert-funky" data-testid="error-message">🚨 <%= error %></div>
-    <% } %>
-
     <div class="grid-2">
       <section class="card">
-        <h2>➕ Tambah Pengeluaran</h2>
+        <h2>➖ Tambah Pengeluaran</h2>
         <form method="POST" action="/expenses">
           <label for="amount">Nominal (Rp)</label>
           <input type="number" id="amount" name="amount" placeholder="cth. 50000">
@@ -86,8 +104,26 @@
       </section>
 
       <section class="card">
-        <h2>🔍 Filter</h2>
-        <form method="GET" action="/">
+        <h2>➕ Tambah Pemasukan</h2>
+        <form method="POST" action="/incomes">
+          <label for="i-amount">Nominal (Rp)</label>
+          <input type="number" id="i-amount" name="amount" placeholder="cth. 1000000">
+
+          <label for="i-date">Tanggal</label>
+          <input type="date" id="i-date" name="date">
+
+          <label for="i-note">Catatan</label>
+          <input type="text" id="i-note" name="note" placeholder="cth. Gaji, bonus, THR">
+
+          <button type="submit" class="btn-funky btn-income" data-testid="submit-income">Tambah</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>🔍 Filter Pengeluaran</h2>
+      <form method="GET" action="/" class="filter-inline">
+        <div class="filter-field">
           <label for="filter-category">Kategori</label>
           <select id="filter-category" name="category">
             <option value="">Semua Kategori</option>
@@ -95,36 +131,45 @@
               <option value="<%= cat %>" <%= filters.category === cat ? 'selected' : '' %>><%= cat %></option>
             <% }) %>
           </select>
+        </div>
+        <div class="filter-field">
+          <label for="dateFrom">Dari</label>
+          <input type="date" id="dateFrom" name="dateFrom" value="<%= filters.dateFrom %>">
+        </div>
+        <div class="filter-field">
+          <label for="dateTo">Sampai</label>
+          <input type="date" id="dateTo" name="dateTo" value="<%= filters.dateTo %>">
+        </div>
+        <button type="submit" class="btn-funky btn-small" data-testid="submit-filter">Terapkan Filter</button>
+      </form>
+    </section>
 
-          <div class="row-2">
-            <div>
-              <label for="dateFrom">Dari</label>
-              <input type="date" id="dateFrom" name="dateFrom" value="<%= filters.dateFrom %>">
-            </div>
-            <div>
-              <label for="dateTo">Sampai</label>
-              <input type="date" id="dateTo" name="dateTo" value="<%= filters.dateTo %>">
-            </div>
+    <div class="grid-2">
+      <section class="card">
+        <h2>📊 Pengeluaran per Kategori</h2>
+        <% if (Object.keys(categorySummary).length === 0) { %>
+          <p class="chart-empty" data-testid="chart-empty">Belum ada data untuk digambar 🎨</p>
+        <% } else { %>
+          <div class="chart-box">
+            <canvas id="categoryChart" data-testid="category-chart"></canvas>
           </div>
+        <% } %>
+      </section>
 
-          <button type="submit" class="btn-funky btn-outline" data-testid="submit-filter">Terapkan Filter</button>
-        </form>
+      <section class="card">
+        <h2>📈 Tren 6 Bulan Terakhir</h2>
+        <div class="chart-box">
+          <canvas id="trendChart" data-testid="trend-chart"></canvas>
+        </div>
       </section>
     </div>
 
-    <section class="card">
-      <h2>📊 Pengeluaran per Kategori</h2>
-      <% if (Object.keys(categorySummary).length === 0) { %>
-        <p class="chart-empty" data-testid="chart-empty">Belum ada data untuk digambar 🎨</p>
-      <% } else { %>
-        <div class="chart-box">
-          <canvas id="categoryChart" data-testid="category-chart"></canvas>
-        </div>
-      <% } %>
-    </section>
-
     <section class="card card-list">
-      <h2>📒 Daftar Pengeluaran</h2>
+      <div class="list-head">
+        <h2>📒 Daftar Pengeluaran</h2>
+        <a href="/export/csv?category=<%= encodeURIComponent(filters.category) %>&dateFrom=<%= filters.dateFrom %>&dateTo=<%= filters.dateTo %>"
+           class="btn-funky btn-small btn-outline" data-testid="export-csv">Export CSV</a>
+      </div>
       <div class="table-scroll">
         <table data-testid="expense-table">
           <thead>
@@ -160,10 +205,45 @@
                 <td>
                   <div class="row-actions">
                     <a href="/expenses/<%= exp.id %>/edit" class="btn-icon btn-icon-edit" data-testid="edit-btn">✏️</a>
-                    <form method="POST" action="/expenses/<%= exp.id %>/delete">
+                    <form method="POST" action="/expenses/<%= exp.id %>/delete" onsubmit="return confirm('Hapus pengeluaran ini?')">
                       <button type="submit" class="btn-icon" data-testid="delete-btn">🗑️</button>
                     </form>
                   </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card card-list">
+      <h2>💼 Daftar Pemasukan</h2>
+      <div class="table-scroll">
+        <table data-testid="income-table">
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Nominal</th>
+              <th>Catatan</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (incomes.length === 0) { %>
+              <tr class="empty-row">
+                <td colspan="4" data-testid="income-empty-row">Belum ada pemasukan tercatat 💤</td>
+              </tr>
+            <% } %>
+            <% incomes.forEach(function(inc) { %>
+              <tr class="expense-row" data-testid="income-row" data-id="<%= inc.id %>">
+                <td><%= inc.date %></td>
+                <td class="amount amount-in">Rp <%= inc.amount.toLocaleString('id-ID') %></td>
+                <td><%= inc.note %></td>
+                <td>
+                  <form method="POST" action="/incomes/<%= inc.id %>/delete" onsubmit="return confirm('Hapus pemasukan ini?')">
+                    <button type="submit" class="btn-icon" data-testid="income-delete-btn">🗑️</button>
+                  </form>
                 </td>
               </tr>
             <% }) %>
@@ -175,10 +255,12 @@
 
   <footer class="foot">made with ☕ + a few 🐛 fixes</footer>
 
-  <% if (Object.keys(categorySummary).length > 0) { %>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
-    <script>
-      const summary = <%- JSON.stringify(categorySummary) %>;
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  <script>
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+    const summary = <%- JSON.stringify(categorySummary) %>;
+    if (Object.keys(summary).length > 0) {
       const palette = {
         Makanan: '#f97316',
         Transportasi: '#3b82f6',
@@ -213,7 +295,45 @@
           }
         }
       });
-    </script>
-  <% } %>
+    }
+
+    const trend = <%- JSON.stringify(trend) %>;
+    new Chart(document.getElementById('trendChart'), {
+      type: 'bar',
+      data: {
+        labels: trend.map(function (t) {
+          const parts = t.month.split('-');
+          return monthNames[Number(parts[1]) - 1] + ' ' + parts[0];
+        }),
+        datasets: [{
+          data: trend.map(function (t) { return t.total; }),
+          backgroundColor: 'rgba(124, 58, 237, 0.7)',
+          borderRadius: 8
+        }]
+      },
+      options: {
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                return 'Rp ' + ctx.parsed.y.toLocaleString('id-ID');
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: function (value) {
+                return value >= 1000000 ? (value / 1000000) + 'jt' : value >= 1000 ? (value / 1000) + 'rb' : value;
+              }
+            }
+          }
+        }
+      }
+    });
+  </script>
 </body>
 </html>
