@@ -5,3 +5,8 @@ playwright/.cache/
 data/expenses.test.json
 data/settings.test.json
 data/incomes.test.json
+android/build/
+android/app/build/
+android/.gradle/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/

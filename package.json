@@ -9,11 +9,14 @@
     "test:system": "playwright test"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
     "ejs": "^3.1.10",
     "exceljs": "^4.4.0",
     "express": "^4.21.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.1",
     "@playwright/test": "^1.50.1",
     "jest": "^29.7.0"
   }

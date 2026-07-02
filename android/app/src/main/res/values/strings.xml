@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Duit Kemana Aja</string>
+    <string name="title_activity_main">Duit Kemana Aja</string>
+    <string name="package_name">id.rizki.expensetracker</string>
+    <string name="custom_url_scheme">id.rizki.expensetracker</string>
+</resources>
