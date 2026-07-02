@@ -20,11 +20,39 @@
   </header>
 
   <main class="wrap">
-    <div class="stat-card">
-      <span class="stat-emoji">🪙</span>
-      <div>
-        <p class="stat-label">Total Pengeluaran</p>
-        <p class="stat-value" data-testid="total-amount">Rp <%= total.toLocaleString('id-ID') %></p>
+    <div class="grid-2 stat-grid">
+      <div class="stat-card">
+        <span class="stat-emoji">🪙</span>
+        <div>
+          <p class="stat-label">Total Pengeluaran</p>
+          <p class="stat-value" data-testid="total-amount">Rp <%= total.toLocaleString('id-ID') %></p>
+        </div>
+      </div>
+
+      <div class="stat-card budget-card">
+        <span class="stat-emoji">🎯</span>
+        <div class="budget-body">
+          <p class="stat-label">Budget Bulan Ini</p>
+          <% if (budget.limit > 0) { %>
+            <p class="budget-text" data-testid="budget-text">
+              Rp <%= budget.spent.toLocaleString('id-ID') %> / Rp <%= budget.limit.toLocaleString('id-ID') %>
+            </p>
+            <div class="progress-track">
+              <div class="progress-fill progress-<%= budget.state %>" data-testid="budget-progress" style="width: <%= budget.percent %>%"></div>
+            </div>
+            <% if (budget.state === 'over') { %>
+              <p class="budget-note budget-note-over" data-testid="budget-note">Budget bulan ini sudah terlampaui!</p>
+            <% } else if (budget.state === 'warn') { %>
+              <p class="budget-note budget-note-warn" data-testid="budget-note">Hati-hati, budget hampir habis.</p>
+            <% } %>
+          <% } else { %>
+            <p class="budget-text" data-testid="budget-text">Belum diatur</p>
+          <% } %>
+          <form method="POST" action="/budget" class="budget-form">
+            <input type="number" name="monthlyBudget" placeholder="cth. 2000000" value="<%= budget.limit > 0 ? budget.limit : '' %>">
+            <button type="submit" class="btn-funky btn-small" data-testid="submit-budget">Simpan</button>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -84,6 +112,17 @@
       </section>
     </div>
 
+    <section class="card">
+      <h2>📊 Pengeluaran per Kategori</h2>
+      <% if (Object.keys(categorySummary).length === 0) { %>
+        <p class="chart-empty" data-testid="chart-empty">Belum ada data untuk digambar 🎨</p>
+      <% } else { %>
+        <div class="chart-box">
+          <canvas id="categoryChart" data-testid="category-chart"></canvas>
+        </div>
+      <% } %>
+    </section>
+
     <section class="card card-list">
       <h2>📒 Daftar Pengeluaran</h2>
       <div class="table-scroll">
@@ -119,9 +158,12 @@
                 <td class="amount">Rp <%= exp.amount.toLocaleString('id-ID') %></td>
                 <td><%= exp.note %></td>
                 <td>
-                  <form method="POST" action="/expenses/<%= exp.id %>/delete">
-                    <button type="submit" class="btn-icon" data-testid="delete-btn">🗑️</button>
-                  </form>
+                  <div class="row-actions">
+                    <a href="/expenses/<%= exp.id %>/edit" class="btn-icon btn-icon-edit" data-testid="edit-btn">✏️</a>
+                    <form method="POST" action="/expenses/<%= exp.id %>/delete">
+                      <button type="submit" class="btn-icon" data-testid="delete-btn">🗑️</button>
+                    </form>
+                  </div>
                 </td>
               </tr>
             <% }) %>
@@ -132,5 +174,46 @@
   </main>
 
   <footer class="foot">made with ☕ + a few 🐛 fixes</footer>
+
+  <% if (Object.keys(categorySummary).length > 0) { %>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+    <script>
+      const summary = <%- JSON.stringify(categorySummary) %>;
+      const palette = {
+        Makanan: '#f97316',
+        Transportasi: '#3b82f6',
+        Belanja: '#ec4899',
+        Tagihan: '#64748b',
+        Hiburan: '#22c55e',
+        Lainnya: '#eab308'
+      };
+      const labels = Object.keys(summary);
+      new Chart(document.getElementById('categoryChart'), {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: labels.map(function (l) { return summary[l]; }),
+            backgroundColor: labels.map(function (l) { return palette[l] || '#a78bfa'; }),
+            borderWidth: 3,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { font: { family: 'Inter' }, usePointStyle: true } },
+            tooltip: {
+              callbacks: {
+                label: function (ctx) {
+                  return ctx.label + ': Rp ' + ctx.parsed.toLocaleString('id-ID');
+                }
+              }
+            }
+          }
+        }
+      });
+    </script>
+  <% } %>
 </body>
 </html>

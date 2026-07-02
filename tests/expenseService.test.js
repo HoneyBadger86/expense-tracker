@@ -3,7 +3,11 @@ const {
   createExpense,
   filterExpenses,
   calculateTotal,
-  deleteExpense
+  deleteExpense,
+  updateExpense,
+  summarizeByCategory,
+  monthlyTotal,
+  budgetStatus
 } = require('../src/expenseService');
 
 describe('validateExpense', () => {
@@ -111,5 +115,90 @@ describe('deleteExpense', () => {
   test('handles id as string vs number', () => {
     const expenses = [{ id: 1 }, { id: 2 }];
     expect(deleteExpense(expenses, '1')).toEqual([{ id: 2 }]);
+  });
+});
+
+describe('updateExpense', () => {
+  const expenses = [
+    { id: 1, amount: 10000, category: 'Makanan', date: '2026-07-01', note: 'lama' },
+    { id: 2, amount: 20000, category: 'Belanja', date: '2026-07-02', note: '' }
+  ];
+
+  test('updates fields of matching expense and keeps its id', () => {
+    const result = updateExpense(expenses, 1, {
+      amount: '75000',
+      category: 'Hiburan',
+      date: '2026-07-05',
+      note: 'baru'
+    });
+    expect(result[0]).toEqual({
+      id: 1,
+      amount: 75000,
+      category: 'Hiburan',
+      date: '2026-07-05',
+      note: 'baru'
+    });
+  });
+
+  test('leaves other expenses untouched', () => {
+    const result = updateExpense(expenses, 1, {
+      amount: '75000',
+      category: 'Hiburan',
+      date: '2026-07-05'
+    });
+    expect(result[1]).toEqual(expenses[1]);
+  });
+
+  test('throws when updated data is invalid', () => {
+    expect(() => updateExpense(expenses, 1, { amount: '0', category: '', date: '' })).toThrow();
+  });
+});
+
+describe('summarizeByCategory', () => {
+  test('sums amounts per category', () => {
+    const expenses = [
+      { amount: 10000, category: 'Makanan' },
+      { amount: 5000, category: 'Makanan' },
+      { amount: 20000, category: 'Transportasi' }
+    ];
+    expect(summarizeByCategory(expenses)).toEqual({ Makanan: 15000, Transportasi: 20000 });
+  });
+
+  test('returns empty object for empty list', () => {
+    expect(summarizeByCategory([])).toEqual({});
+  });
+});
+
+describe('monthlyTotal', () => {
+  const expenses = [
+    { amount: 10000, date: '2026-07-01' },
+    { amount: 20000, date: '2026-07-15' },
+    { amount: 99000, date: '2026-06-30' }
+  ];
+
+  test('sums only expenses in the given month', () => {
+    expect(monthlyTotal(expenses, '2026-07')).toBe(30000);
+  });
+
+  test('returns 0 when no expense in that month', () => {
+    expect(monthlyTotal(expenses, '2026-01')).toBe(0);
+  });
+});
+
+describe('budgetStatus', () => {
+  test('returns none when limit is not set', () => {
+    expect(budgetStatus(50000, 0)).toEqual({ percent: 0, state: 'none' });
+  });
+
+  test('returns ok when spending is below 80% of limit', () => {
+    expect(budgetStatus(50000, 100000)).toEqual({ percent: 50, state: 'ok' });
+  });
+
+  test('returns warn when spending reaches 80% of limit', () => {
+    expect(budgetStatus(80000, 100000)).toEqual({ percent: 80, state: 'warn' });
+  });
+
+  test('returns over with capped percent when limit exceeded', () => {
+    expect(budgetStatus(150000, 100000)).toEqual({ percent: 100, state: 'over' });
   });
 });

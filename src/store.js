@@ -15,4 +15,18 @@ function saveExpenses(expenses) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(expenses, null, 2));
 }
 
-module.exports = { loadExpenses, saveExpenses, DATA_FILE };
+const SETTINGS_FILE = process.env.SETTINGS_FILE || path.join(__dirname, '..', 'data', 'settings.json');
+
+function loadSettings() {
+  if (!fs.existsSync(SETTINGS_FILE)) {
+    return { monthlyBudget: 0 };
+  }
+  const raw = fs.readFileSync(SETTINGS_FILE, 'utf-8').trim();
+  return raw ? JSON.parse(raw) : { monthlyBudget: 0 };
+}
+
+function saveSettings(settings) {
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+}
+
+module.exports = { loadExpenses, saveExpenses, loadSettings, saveSettings, DATA_FILE, SETTINGS_FILE };

@@ -3,9 +3,11 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '..', 'data', 'expenses.test.json');
+const SETTINGS_FILE = path.join(__dirname, '..', 'data', 'settings.test.json');
 
 test.beforeEach(async () => {
   fs.writeFileSync(DATA_FILE, '[]');
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify({ monthlyBudget: 0 }));
 });
 
 test('menampilkan pesan kosong saat belum ada data', async ({ page }) => {
@@ -59,6 +61,93 @@ test('filter kategori hanya menampilkan data yang sesuai', async ({ page }) => {
   const rows = page.getByTestId('expense-row');
   await expect(rows).toHaveCount(1);
   await expect(rows.first()).toContainText('Transportasi', { ignoreCase: true });
+});
+
+test('mengedit pengeluaran mengubah data di daftar', async ({ page }) => {
+  await page.goto('/');
+
+  await page.fill('#amount', '10000');
+  await page.selectOption('#category', 'Makanan');
+  await page.fill('#date', '2026-07-01');
+  await page.fill('#note', 'Sarapan');
+  await page.getByTestId('submit-add').click();
+
+  await page.getByTestId('edit-btn').click();
+  await expect(page).toHaveURL(/\/edit$/);
+
+  await page.fill('#amount', '35000');
+  await page.selectOption('#category', 'Hiburan');
+  await page.fill('#note', 'Nonton film');
+  await page.getByTestId('submit-update').click();
+
+  const row = page.getByTestId('expense-row');
+  await expect(row).toHaveCount(1);
+  await expect(row).toContainText('Hiburan', { ignoreCase: true });
+  await expect(row).toContainText('Nonton film', { ignoreCase: true });
+  await expect(page.getByTestId('total-amount')).toContainText('Rp 35.000');
+});
+
+test('edit dengan data tidak valid menampilkan error dan tidak mengubah data', async ({ page }) => {
+  await page.goto('/');
+
+  await page.fill('#amount', '10000');
+  await page.selectOption('#category', 'Makanan');
+  await page.fill('#date', '2026-07-01');
+  await page.getByTestId('submit-add').click();
+
+  await page.getByTestId('edit-btn').click();
+  await page.fill('#amount', '0');
+  await page.getByTestId('submit-update').click();
+
+  await expect(page.getByTestId('error-message')).toBeVisible();
+
+  await page.goto('/');
+  await expect(page.getByTestId('total-amount')).toContainText('Rp 10.000');
+});
+
+test('mengatur budget menampilkan progress pemakaian bulan ini', async ({ page }) => {
+  const today = new Date().toISOString().slice(0, 10);
+  await page.goto('/');
+
+  await page.fill('input[name="monthlyBudget"]', '100000');
+  await page.getByTestId('submit-budget').click();
+
+  await expect(page.getByTestId('budget-text')).toContainText('Rp 0 / Rp 100.000');
+
+  await page.fill('#amount', '50000');
+  await page.selectOption('#category', 'Makanan');
+  await page.fill('#date', today);
+  await page.getByTestId('submit-add').click();
+
+  await expect(page.getByTestId('budget-text')).toContainText('Rp 50.000 / Rp 100.000');
+  await expect(page.getByTestId('budget-progress')).toHaveAttribute('style', /width:\s*50%/);
+});
+
+test('budget terlampaui menampilkan peringatan', async ({ page }) => {
+  const today = new Date().toISOString().slice(0, 10);
+  await page.goto('/');
+
+  await page.fill('input[name="monthlyBudget"]', '40000');
+  await page.getByTestId('submit-budget').click();
+
+  await page.fill('#amount', '60000');
+  await page.selectOption('#category', 'Belanja');
+  await page.fill('#date', today);
+  await page.getByTestId('submit-add').click();
+
+  await expect(page.getByTestId('budget-note')).toContainText('terlampaui', { ignoreCase: true });
+});
+
+test('chart per kategori muncul saat ada data', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('chart-empty')).toBeVisible();
+
+  await page.fill('#amount', '25000');
+  await page.selectOption('#category', 'Transportasi');
+  await page.fill('#date', '2026-07-01');
+  await page.getByTestId('submit-add').click();
+
+  await expect(page.getByTestId('category-chart')).toBeVisible();
 });
 
 test('menghapus pengeluaran menghilangkan baris dan mengurangi total', async ({ page }) => {

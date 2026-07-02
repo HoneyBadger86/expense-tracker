@@ -13,7 +13,11 @@ module.exports = defineConfig({
   webServer: {
     command: 'node server.js',
     port: 3100,
-    env: { PORT: '3100', DATA_FILE: 'data/expenses.test.json' },
+    env: {
+      PORT: '3100',
+      DATA_FILE: 'data/expenses.test.json',
+      SETTINGS_FILE: 'data/settings.test.json'
+    },
     reuseExistingServer: false,
     timeout: 10000
   }
