@@ -298,6 +298,36 @@ a.btn-funky {
   color: #15803d;
 }
 
+.hero-icon {
+  background: linear-gradient(90deg, var(--pink), var(--orange));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card h2 > i {
+  color: var(--violet);
+  margin-right: 6px;
+  font-size: 17px;
+}
+
+.stat-emoji i {
+  font-size: 30px;
+}
+
+.icon-violet { color: var(--violet); }
+.icon-green { color: #16a34a; }
+.icon-amber { color: #d97706; }
+.icon-pink { color: var(--pink); }
+
+.chip i {
+  font-size: 12px;
+}
+
+.btn-icon i {
+  font-size: 14px;
+}
+
 .btn-link {
   display: block;
   text-align: center;

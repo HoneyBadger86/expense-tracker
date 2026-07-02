@@ -6,6 +6,7 @@
   <title>Expense Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -14,19 +15,19 @@
   <div class="blob blob-3"></div>
 
   <header class="hero">
-    <p class="eyebrow">✨ money, but make it fun</p>
-    <h1>Duit Kemana Aja? 💸</h1>
+    <p class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> money, but make it fun</p>
+    <h1>Duit Kemana Aja? <i class="fa-solid fa-money-bill-wave hero-icon"></i></h1>
     <p class="tagline">Catat pengeluaran harianmu tanpa drama.</p>
   </header>
 
   <main class="wrap">
     <% if (error) { %>
-      <div class="alert-funky" data-testid="error-message">🚨 <%= error %></div>
+      <div class="alert-funky" data-testid="error-message"><i class="fa-solid fa-triangle-exclamation"></i> <%= error %></div>
     <% } %>
 
     <div class="grid-2 stat-grid">
       <div class="stat-card">
-        <span class="stat-emoji">🪙</span>
+        <span class="stat-emoji icon-violet"><i class="fa-solid fa-coins"></i></span>
         <div>
           <p class="stat-label">Total Pengeluaran</p>
           <p class="stat-value" data-testid="total-amount">Rp <%= total.toLocaleString('id-ID') %></p>
@@ -34,7 +35,7 @@
       </div>
 
       <div class="stat-card">
-        <span class="stat-emoji">💰</span>
+        <span class="stat-emoji icon-green"><i class="fa-solid fa-sack-dollar"></i></span>
         <div>
           <p class="stat-label">Pemasukan Bulan Ini</p>
           <p class="stat-value stat-income" data-testid="income-total">Rp <%= incomeThisMonth.toLocaleString('id-ID') %></p>
@@ -42,7 +43,7 @@
       </div>
 
       <div class="stat-card">
-        <span class="stat-emoji">⚖️</span>
+        <span class="stat-emoji icon-amber"><i class="fa-solid fa-scale-balanced"></i></span>
         <div>
           <p class="stat-label">Saldo Bulan Ini</p>
           <p class="stat-value <%= balance < 0 ? 'stat-negative' : 'stat-income' %>" data-testid="balance-amount">
@@ -52,7 +53,7 @@
       </div>
 
       <div class="stat-card budget-card">
-        <span class="stat-emoji">🎯</span>
+        <span class="stat-emoji icon-pink"><i class="fa-solid fa-bullseye"></i></span>
         <div class="budget-body">
           <p class="stat-label">Budget Bulan Ini</p>
           <% if (budget.limit > 0) { %>
@@ -80,7 +81,7 @@
 
     <div class="grid-2">
       <section class="card">
-        <h2>➖ Tambah Pengeluaran</h2>
+        <h2><i class="fa-solid fa-circle-minus"></i> Tambah Pengeluaran</h2>
         <form method="POST" action="/expenses">
           <label for="amount">Nominal (Rp)</label>
           <input type="number" id="amount" name="amount" placeholder="cth. 50000">
@@ -104,7 +105,7 @@
       </section>
 
       <section class="card">
-        <h2>➕ Tambah Pemasukan</h2>
+        <h2><i class="fa-solid fa-circle-plus"></i> Tambah Pemasukan</h2>
         <form method="POST" action="/incomes">
           <label for="i-amount">Nominal (Rp)</label>
           <input type="number" id="i-amount" name="amount" placeholder="cth. 1000000">
@@ -121,7 +122,7 @@
     </div>
 
     <section class="card">
-      <h2>🔍 Filter Pengeluaran</h2>
+      <h2><i class="fa-solid fa-filter"></i> Filter Pengeluaran</h2>
       <form method="GET" action="/" class="filter-inline">
         <div class="filter-field">
           <label for="filter-category">Kategori</label>
@@ -146,9 +147,9 @@
 
     <div class="grid-2">
       <section class="card">
-        <h2>📊 Pengeluaran per Kategori</h2>
+        <h2><i class="fa-solid fa-chart-pie"></i> Pengeluaran per Kategori</h2>
         <% if (Object.keys(categorySummary).length === 0) { %>
-          <p class="chart-empty" data-testid="chart-empty">Belum ada data untuk digambar 🎨</p>
+          <p class="chart-empty" data-testid="chart-empty">Belum ada data untuk digambar</p>
         <% } else { %>
           <div class="chart-box">
             <canvas id="categoryChart" data-testid="category-chart"></canvas>
@@ -157,7 +158,7 @@
       </section>
 
       <section class="card">
-        <h2>📈 Tren 6 Bulan Terakhir</h2>
+        <h2><i class="fa-solid fa-chart-column"></i> Tren 6 Bulan Terakhir</h2>
         <div class="chart-box">
           <canvas id="trendChart" data-testid="trend-chart"></canvas>
         </div>
@@ -166,7 +167,7 @@
 
     <section class="card card-list">
       <div class="list-head">
-        <h2>📒 Daftar Pengeluaran</h2>
+        <h2><i class="fa-solid fa-list"></i> Daftar Pengeluaran</h2>
         <a href="/export/csv?category=<%= encodeURIComponent(filters.category) %>&dateFrom=<%= filters.dateFrom %>&dateTo=<%= filters.dateTo %>"
            class="btn-funky btn-small btn-outline" data-testid="export-csv">Export CSV</a>
       </div>
@@ -184,29 +185,29 @@
           <tbody>
             <% if (expenses.length === 0) { %>
               <tr class="empty-row">
-                <td colspan="5" data-testid="empty-row">Belum ada cerita pengeluaran di sini ✍️</td>
+                <td colspan="5" data-testid="empty-row">Belum ada cerita pengeluaran di sini</td>
               </tr>
             <% } %>
             <% var chip = {
-              Makanan: { emoji: '🍔', color: 'chip-orange' },
-              Transportasi: { emoji: '🚗', color: 'chip-blue' },
-              Belanja: { emoji: '🛍️', color: 'chip-pink' },
-              Tagihan: { emoji: '🧾', color: 'chip-slate' },
-              Hiburan: { emoji: '🎉', color: 'chip-green' },
-              Lainnya: { emoji: '📦', color: 'chip-yellow' }
+              Makanan: { icon: 'fa-burger', color: 'chip-orange' },
+              Transportasi: { icon: 'fa-car', color: 'chip-blue' },
+              Belanja: { icon: 'fa-bag-shopping', color: 'chip-pink' },
+              Tagihan: { icon: 'fa-file-invoice', color: 'chip-slate' },
+              Hiburan: { icon: 'fa-gamepad', color: 'chip-green' },
+              Lainnya: { icon: 'fa-box', color: 'chip-yellow' }
             }; %>
             <% expenses.forEach(function(exp) { %>
-              <% var c = chip[exp.category] || { emoji: '💰', color: 'chip-slate' }; %>
+              <% var c = chip[exp.category] || { icon: 'fa-money-bill', color: 'chip-slate' }; %>
               <tr class="expense-row" data-testid="expense-row" data-id="<%= exp.id %>">
                 <td><%= exp.date %></td>
-                <td><span class="chip <%= c.color %>"><%= c.emoji %> <%= exp.category %></span></td>
+                <td><span class="chip <%= c.color %>"><i class="fa-solid <%= c.icon %>"></i> <%= exp.category %></span></td>
                 <td class="amount">Rp <%= exp.amount.toLocaleString('id-ID') %></td>
                 <td><%= exp.note %></td>
                 <td>
                   <div class="row-actions">
-                    <a href="/expenses/<%= exp.id %>/edit" class="btn-icon btn-icon-edit" data-testid="edit-btn">✏️</a>
+                    <a href="/expenses/<%= exp.id %>/edit" class="btn-icon btn-icon-edit" data-testid="edit-btn"><i class="fa-solid fa-pen"></i></a>
                     <form method="POST" action="/expenses/<%= exp.id %>/delete" onsubmit="return confirm('Hapus pengeluaran ini?')">
-                      <button type="submit" class="btn-icon" data-testid="delete-btn">🗑️</button>
+                      <button type="submit" class="btn-icon" data-testid="delete-btn"><i class="fa-solid fa-trash"></i></button>
                     </form>
                   </div>
                 </td>
@@ -218,7 +219,7 @@
     </section>
 
     <section class="card card-list">
-      <h2>💼 Daftar Pemasukan</h2>
+      <h2><i class="fa-solid fa-briefcase"></i> Daftar Pemasukan</h2>
       <div class="table-scroll">
         <table data-testid="income-table">
           <thead>
@@ -232,7 +233,7 @@
           <tbody>
             <% if (incomes.length === 0) { %>
               <tr class="empty-row">
-                <td colspan="4" data-testid="income-empty-row">Belum ada pemasukan tercatat 💤</td>
+                <td colspan="4" data-testid="income-empty-row">Belum ada pemasukan tercatat</td>
               </tr>
             <% } %>
             <% incomes.forEach(function(inc) { %>
@@ -242,7 +243,7 @@
                 <td><%= inc.note %></td>
                 <td>
                   <form method="POST" action="/incomes/<%= inc.id %>/delete" onsubmit="return confirm('Hapus pemasukan ini?')">
-                    <button type="submit" class="btn-icon" data-testid="income-delete-btn">🗑️</button>
+                    <button type="submit" class="btn-icon" data-testid="income-delete-btn"><i class="fa-solid fa-trash"></i></button>
                   </form>
                 </td>
               </tr>
@@ -253,7 +254,7 @@
     </section>
   </main>
 
-  <footer class="foot">made with ☕ + a few 🐛 fixes</footer>
+  <footer class="foot">made with <i class="fa-solid fa-mug-hot"></i> + a few <i class="fa-solid fa-bug"></i> fixes</footer>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
   <script>

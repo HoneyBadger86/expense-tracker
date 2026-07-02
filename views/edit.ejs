@@ -6,6 +6,7 @@
   <title>Edit Pengeluaran</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -14,13 +15,13 @@
   <div class="blob blob-3"></div>
 
   <header class="hero">
-    <h1>Edit Pengeluaran ✏️</h1>
+    <h1>Edit Pengeluaran <i class="fa-solid fa-pen hero-icon"></i></h1>
     <p class="tagline">Salah catat? Santai, benerin di sini.</p>
   </header>
 
   <main class="wrap wrap-narrow">
     <% if (error) { %>
-      <div class="alert-funky" data-testid="error-message">🚨 <%= error %></div>
+      <div class="alert-funky" data-testid="error-message"><i class="fa-solid fa-triangle-exclamation"></i> <%= error %></div>
     <% } %>
 
     <section class="card">
