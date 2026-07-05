@@ -331,7 +331,7 @@ const content = [
   bulletBold('Unit test: ', 'npx jest.'),
   bulletBold('System test: ', 'npx playwright test.'),
   bulletBold('Android: ', 'install file DuitKemanaAja-debug.apk, atau build ulang: cd android lalu gradlew assembleDebug.'),
-  bulletBold('Source code: ', 'GitHub repository (tautan disertakan saat pengumpulan).')
+  bulletBold('Source code: ', 'https://github.com/HoneyBadger86/expense-tracker')
 ];
 
 // ===== dokumen =====
