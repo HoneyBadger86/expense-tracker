@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "seed": "node scripts/seed.js",
+    "clear": "node scripts/clear.js",
     "test:unit": "jest",
     "test:system": "playwright test"
   },
