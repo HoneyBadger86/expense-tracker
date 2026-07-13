@@ -226,29 +226,39 @@ const bugRows = [
 // ===== halaman sampul =====
 
 const cover = [
-  new Paragraph({ spacing: { before: 2200 }, children: [] }),
+  new Paragraph({ spacing: { before: 500 }, children: [] }),
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 200 },
+    children: [new ImageRun({
+      type: 'png',
+      data: fs.readFileSync(path.join(DIR, 'logo_utm.png')),
+      transformation: { width: 150, height: 150 },
+      altText: { title: 'Logo UTM', description: 'Logo Universitas Teknologi Mataram', name: 'logo_utm' }
+    })]
+  }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 120 },
-    children: [new TextRun({ text: 'LAPORAN SINGKAT TUGAS PROYEK', bold: true, size: 40 })]
+    children: [new TextRun({ text: 'LAPORAN SINGKAT TUGAS PROYEK', bold: true, size: 36 })]
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
     spacing: { after: 80 },
-    children: [new TextRun({ text: 'Aplikasi Pencatatan Pengeluaran Harian', size: 28 })]
+    children: [new TextRun({ text: 'Aplikasi Pencatatan Pengeluaran Harian', size: 26 })]
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
-    spacing: { after: 400 },
-    children: [new TextRun({ text: '"Duit Kemana Aja?" — Web & Android', bold: true, size: 30, color: VIOLET })]
+    spacing: { after: 320 },
+    children: [new TextRun({ text: '"Duit Kemana Aja?" — Web & Android', bold: true, size: 28, color: VIOLET })]
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
-    spacing: { after: 500 },
+    spacing: { after: 300 },
     children: [new ImageRun({
       type: 'png',
       data: fs.readFileSync(path.join(DIR, '02-desktop-stats.png')),
-      transformation: { width: 440, height: 309 },
+      transformation: { width: 380, height: 267 },
       altText: { title: 'Dashboard', description: 'Dashboard aplikasi', name: 'cover' }
     })]
   }),
@@ -259,17 +269,37 @@ const cover = [
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
-    spacing: { after: 60 },
-    children: [new TextRun({ text: 'Rizki Ansori', bold: true, size: 26 })]
+    spacing: { after: 40 },
+    children: [new TextRun({ text: 'RIZKI ANSORI', bold: true, size: 28 })]
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
-    spacing: { after: 400 },
-    children: [new TextRun({ text: 'Teknik Informatika — Universitas Teknologi Mataram', size: 22 })]
+    spacing: { after: 120 },
+    children: [new TextRun({ text: 'NIM: 24TI051', size: 22 })]
   }),
   new Paragraph({
     alignment: AlignmentType.CENTER,
-    children: [new TextRun({ text: '2026', bold: true, size: 24 })]
+    spacing: { after: 40 },
+    children: [new TextRun({ text: 'Dosen Pengampu:', size: 22 })]
+  }),
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 200 },
+    children: [new TextRun({ text: 'Selamet Riadi, M.Kom', bold: true, size: 22 })]
+  }),
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 40 },
+    children: [new TextRun({ text: 'Program Studi Teknik Informatika', size: 22 })]
+  }),
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    spacing: { after: 40 },
+    children: [new TextRun({ text: 'Universitas Teknologi Mataram', bold: true, size: 22 })]
+  }),
+  new Paragraph({
+    alignment: AlignmentType.CENTER,
+    children: [new TextRun({ text: '2026', bold: true, size: 22 })]
   })
 ];
 
